@@ -7,13 +7,13 @@
     <title>index</title>
 </head>
 <body>
-    <div class="bigmark">
-        <div class="centermark">
+    <div class="bigmark" id="bigmark">
+      <canvas id="Canvas">您的浏览器不支持Canvas</canvas>
+        <div class="centermark" id="centermark">
             <div ref="bookmark" v-for="bookmarks in bookmarkswihtstyle" :key="bookmarks['bookmark']"
             @mouseover="beenchose(bookmarks['bookmark'])" @mouseout="beenmove(bookmarks['bookmark'])"
             :id="bookmarks['bookmark']"
             :style="bookmarks['style']">
-            <font size="6">我是一段文字</font>
             </div>
         </div>
         <div class="bottommark"></div>
@@ -35,6 +35,9 @@ export default {
     }
   },
   mounted () {
+    // 初始化画布
+    this.initCanvas()
+    window.addEventListener('click', this.mousemove)
     // bookmark由服务器传输过来，大致包括标题、序号，需要转换成标题、序号加样式
     var bookmarks = [{'bookmark': '1', 'title': 'this is one'},
       {'bookmark': '2', 'title': 'this is one'},
@@ -46,14 +49,46 @@ export default {
       {'bookmark': '8', 'title': 'this is one'},
       {'bookmark': '9', 'title': 'this is one'},
       {'bookmark': '10', 'title': 'this is one'}]
-    var blockwidth = 100
-    var lablewidth = 500
-    var lableheight = 400
     var bookcount = bookmarks.length
-    this.bookmarkswihtstyle = this.thelocation(bookcount, lablewidth, lableheight, blockwidth, bookmarks)
-    console.log(this.bookmarkswihtstyle)
+    document.getElementById('centermark').style.left = String(window.innerWidth / 4) + 'px'
+    document.getElementById('centermark').style.width = String(window.innerWidth / 2) + 'px'
+    document.getElementById('bigmark').style.height = String(window.innerHeight) + 'px'
+    this.bookmarkswihtstyle = this.thelocation(bookcount, window.innerWidth / 2, window.innerHeight / 4, window.innerWidth / 10, bookmarks)
+    window.onresize = () => {
+      this.initCanvas()
+      document.getElementById('centermark').style.left = String(window.innerWidth / 4) + 'px'
+      document.getElementById('centermark').style.width = String(window.innerWidth / 2) + 'px'
+      document.getElementById('bigmark').style.height = String(window.innerHeight) + 'px'
+      this.bookmarkswihtstyle = this.thelocation(bookcount, window.innerWidth / 2, window.innerHeight / 4, window.innerWidth / 10, bookmarks)
+    }
   },
   methods: {
+    // 初始化Canvas
+    initCanvas: function () {
+      let canvas = document.getElementById('Canvas')
+      canvas.width = window.innerWidth - 32
+      canvas.height = window.innerHeight / 2
+      var ctx = canvas.getContext('2d')
+      for (var i = 0; i < 100; i++) {
+        var x = 5 + Math.random() * (canvas.width - 10)
+        var y = 5 + Math.random() * (canvas.height - 10)
+        var radius = Math.random() * 10
+        ctx.beginPath()
+        ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
+        ctx.fillStyle = 'red'
+        ctx.fill()
+        ctx.closePath()
+      }
+    },
+    // loop
+    animate: function () {
+      requestAnimationFrame(this.animate)
+    },
+    // 鼠标移动事件
+    mousemove: function () {
+      console.log(event.screenX)
+      console.log(event.screenY)
+    },
     // 当前块被选择时 会向上进行弹出
     beenchose: function (bookmark) {
       document.getElementById(bookmark).style.background = 'red'
@@ -79,7 +114,7 @@ export default {
       var countthir = 0
       var countfor = 0
       var bookmarkswihtstyle = []
-      var averagewidthbreak = 100 / (alllenth / 4 + 1)
+      var averagewidthbreak = lablewidth / 4 / (alllenth / 4 + 1)
       var averageheightbreak = 60 / (alllenth / 4 + 1)
       var locationleft = 0
       var locationtop = 0
@@ -97,7 +132,7 @@ export default {
             countfir = countfir + 1
             break
           case 1:
-            locationleft = lablewidth / 2 - blockwidth / 2 - countsec * averagewidthbreak + 100
+            locationleft = lablewidth / 2 - blockwidth / 2 - countsec * averagewidthbreak + lablewidth / 4
             locationtop = lableheight / 2 + countsec * averageheightbreak
             newstyle = style + String(locationleft) + 'px;top:' + String(locationtop) + 'px;'
             onesample = { 'bookmark': bookmarks[i]['bookmark'], 'style': newstyle, 'title': bookmarks[i]['title'] }
@@ -105,7 +140,7 @@ export default {
             countsec = countsec + 1
             break
           case 2:
-            locationleft = lablewidth / 2 - blockwidth / 2 + countthir * averagewidthbreak - 100
+            locationleft = lablewidth / 2 - blockwidth / 2 + countthir * averagewidthbreak - lablewidth / 4
             locationtop = lableheight / 2 - countthir * averageheightbreak
             newstyle = style + String(locationleft) + 'px;top:' + String(locationtop) + 'px;'
             onesample = { 'bookmark': bookmarks[i]['bookmark'], 'style': newstyle, 'title': bookmarks[i]['title'] }
@@ -129,8 +164,8 @@ export default {
 </script>
 <style>
     .bigmark{
-        width: 1200px;
-        height: 800px;
+        width: 100%;
+        height: 100%;
         background-color: green;
         margin: auto;
         position:relative;
@@ -139,36 +174,9 @@ export default {
         width: 500px;
         height: 400px;
         background-color: yellow;
-        margin: auto;
         position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top:0;
-    }
-    .morecentermark{
-        width: 50px;
-        height: 200px;
-        background-color: green;
-        position: absolute;
-        left: 50px;
-        right: 0;
-        bottom: 50px;
-        top:0;
-    }
-    .centermarkleft{
-        width: 50px;
-        height: 200px;
-        background-color: black;
-        margin: auto;
-        position: absolute;
-    }
-    .centermarkright{
-        width: 50px;
-        height: 200px;
-        background-color: rgb(199, 25, 25);
-        float: right;
-        padding-right: 30px;
+        left:30%;
+        top:10px;
     }
     .bottommark{
         width: 50px;
@@ -176,5 +184,10 @@ export default {
         background-color: greenyellow;
         position: absolute;
         bottom: 0;
+    }
+    .headerline{
+      width: 100%;
+      height: 50px;
+      background-color:black;
     }
 </style>
