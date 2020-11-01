@@ -54,6 +54,7 @@ export default {
     console.log(this.bookmarkswihtstyle)
   },
   methods: {
+    // 当前块被选择时 会向上进行弹出
     beenchose: function (bookmark) {
       document.getElementById(bookmark).style.background = 'red'
       var height = document.getElementById(bookmark).style.top.slice(0, -1)
@@ -62,6 +63,7 @@ export default {
       document.getElementById(bookmark).style.zIndex = 9999
       document.getElementById(bookmark).style.opacity = 1
     },
+    // 离开当前块时会恢复成原来的样子
     beenmove: function (bookmark) {
       document.getElementById(bookmark).style.background = 'green'
       var height = document.getElementById(bookmark).style.top.slice(0, -1)
@@ -70,6 +72,7 @@ export default {
       document.getElementById(bookmark).style.zIndex = 1
       document.getElementById(bookmark).style.opacity = 0.4
     },
+    // 输入一系列的bookmark 返回bookmark的style格式
     thelocation: function (alllenth, lablewidth, lableheight, blockwidth, bookmarks) {
       var countfir = 0
       var countsec = 0
