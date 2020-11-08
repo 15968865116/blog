@@ -1,24 +1,33 @@
 <template>
-<div class="">
-  <div>
-    <canvas id="Canvas" class="canvasclass" style="z-index:1">您的浏览器不支持Canvas</canvas>
-    <div class="bottommark" id="bottommark" @mousemove="beenchose('bottommark')" @mouseout="beenmove('bottommark')">
-      <font id="font">
-        解
-      </font>
-    </div>
-  </div>
-    <!-- <div class="bigmark" id="bigmark">
-         <div class="centermark" id="centermark">
-            <div ref="bookmark" v-for="bookmarks in bookmarkswihtstyle" :key="bookmarks['bookmark']"
-            @mouseover="beenchose(bookmarks['bookmark'])" @mouseout="beenmove(bookmarks['bookmark'])"
-            :id="bookmarks['bookmark']"
-            :style="bookmarks['style']">
-            </div>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=1, initial-scale=1.0">
+      <title>首页</title>
+  </head>
+  <body class="indexbody">
+    <div class="">
+      <div>
+        <canvas id="Canvas" class="canvasclass" style="z-index:1">您的浏览器不支持Canvas</canvas>
+        <div class="bottommark" id="bottommark" @mousemove="beenchose('bottommark')" @mouseout="beenmove('bottommark')">
+          <font id="font">
+            解
+          </font>
         </div>
-        <div class="bottommark"></div>
-    </div>-->
-</div>
+      </div>
+        <!-- <div class="bigmark" id="bigmark">
+            <div class="centermark" id="centermark">
+                <div ref="bookmark" v-for="bookmarks in bookmarkswihtstyle" :key="bookmarks['bookmark']"
+                @mouseover="beenchose(bookmarks['bookmark'])" @mouseout="beenmove(bookmarks['bookmark'])"
+                :id="bookmarks['bookmark']"
+                :style="bookmarks['style']">
+                </div>
+            </div>
+            <div class="bottommark"></div>
+        </div>-->
+    </div>
+  </body>
+</html>
 </template>
 <script>
 export default {
@@ -37,7 +46,6 @@ export default {
   mounted () {
     // 初始化画布
     let canvas = document.getElementById('Canvas')
-    console.log(window.innerHeight)
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight - 5
     for (var i = 0; i < 200; i++) {
@@ -57,7 +65,7 @@ export default {
       canvas.height = window.innerHeight - 4
       document.getElementById('bottommark').style.left = String(canvas.width / 2 - 40) + 'px'
       document.getElementById('bottommark').style.top = String(canvas.height / 2 - 40) + 'px'
-      document.getElementById('bottommark').style.fontSize = String(40) + 'px'
+      document.getElementById('bottommark').style.fontSize = String(50) + 'px'
       document.getElementById('bottommark').style.cursor = 'pointer'
       this.balllist = []
       for (var i = 0; i < 200; i++) {
@@ -236,6 +244,16 @@ export default {
       margin:0;
       padding:0;
     }
+    .indexbody{
+      height: 100%;
+      width: 100%;
+      background: url('../assets/naliduo22.jpg') no-repeat;
+      background-size: cover;
+      position: absolute;
+      overflow: hidden;
+      opacity: 1;
+      background-position: center 0;
+    }
     .bigmark{
         width: 100%;
         height: 100%;
@@ -250,11 +268,11 @@ export default {
         top:10px;
         opacity: 1;
     }
-    .canvasclass {
+    /* .canvasclass {
       background-image: url('../assets/naliduo22.jpg');
       background-repeat:no-repeat;
       background-size:100% 100%;
-    }
+    } */
     .bottommark{
         width: 80px;
         height: 80px;
