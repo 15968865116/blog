@@ -22,12 +22,13 @@
                 v-model="passwd"
                 show-password>
                 </el-input><p></p><br>
-                <el-button type="primary" class="loginbutton">登录</el-button>
+                <el-button type="primary" class="loginbutton" @click="login">登录</el-button>
             </div>
         </body>
     </html>
 </template>
 <script>
+import axois from 'axios'
 export default {
   data () {
     return {
@@ -47,6 +48,38 @@ export default {
       document.getElementById('loginform').style.height = String(window.innerHeight / 2) + 'px'
       document.getElementById('loginform').style.top = String(window.innerHeight / 2 - window.innerHeight / 6) + 'px'
       document.getElementById('loginform').style.left = String(window.innerWidth / 2 - window.innerWidth / 4) + 'px'
+    }
+  },
+  methods: {
+    login: function () {
+      var me = this
+      var config = {
+        method: 'post',
+        // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+        url: 'http://localhost:8090/user/Login',
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8'
+          // 'Host': 'http://175.24.28.202:80'
+        },
+        data: {
+          'account': this.user,
+          'password': this.passwd
+        }
+      }
+      axois(config)
+        .then(function (response) {
+          console.log(response.data)
+          if (response.data.code === 1) {
+            me.$message({
+              message: '你好,' + response.data.username + '!',
+              type: 'success'
+            })
+            localStorage.setItem('token', response.data.token)
+            me.$router.push({path: '/adminmanage', query: {useracc: me.user}})
+          } else {
+            me.$message.error(response.data.msg)
+          }
+        })
     }
   }
 }
