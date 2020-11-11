@@ -9,18 +9,23 @@
         <el-tabs tab-position="left" style="height: 100%;">
           <el-tab-pane label="个人资料">
             <p>头像</p>
-            <p>昵称</p>
+            <p>昵称:<input :value="usermessage.name"></p>
             <p></p>
             <p></p>
             <p></p>
           </el-tab-pane>
-          <el-tab-pane label="用户管理">
-            <p>标题:<input></p>
+          <el-tab-pane label="新增文章">
+            <p>标题:<input v-model="title"></p>
             <p>内容:</p><div ref="editorarea" id="editorarea">
-              <p>初始化的内容</p>
+              <p></p>
+            </div>
+            <button @click="Addnewblog">提交</button>
+          </el-tab-pane>
+          <el-tab-pane label="管理文章">
+            <div v-for="row in blogmessage" :key="row.ID">
+              <a>{{row.Title}}</a><el-button type="primary">修改</el-button><el-button type="warning">删除</el-button>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="配置管理">管理文章</el-tab-pane>
         </el-tabs>
       </body>
     </html>
@@ -32,16 +37,25 @@ export default {
   data () {
     return {
       base64: '',
-      blogcontent: ''
+      blogcontent: '',
+      usermessage: {},
+      blogmessage: [],
+      title: '',
+      acc: ''
     }
   },
   mounted () {
+    var me = this
+    this.$getbasicmessage(this.$route.query.useracc)
+    this.acc = this.$route.query.useracc
+    window.account = this.acc
     var editor = new E(document.getElementById('editorarea'))
     editor.config.height = 500
+    editor.config.zIndex = 1
     // var text1 = document.getElementById('text1')
     editor.config.onchange = function (html) {
     // 第二步，监控变化，同步更新到 textarea
-      this.blogcontent = editor.txt.html()
+      me.blogcontent = editor.txt.html()
     }
     // 菜单
     editor.config.menus = [
@@ -67,7 +81,6 @@ export default {
         // 这里的e.target就是reader
         // console.log(reader.result)
         // reader.result就是图片的base64字符串
-        this.base64 = e.target.result
         var config = {
           method: 'post',
           // url: 'http://175.24.28.202:8000/api/v1/subs_service',
@@ -78,8 +91,8 @@ export default {
           },
           data: {
             'img': reader.result,
-            'token': 'tokenxinxi',
-            'puberaccount': 'puberaccount'
+            'token': localStorage.getItem('token'),
+            'puberaccount': window.account
           }}
         axios(config)
           .then(function (response) {
@@ -115,28 +128,44 @@ export default {
       'Courier New'
     ]
     editor.create()
+    // 通过此来写入初始值
+    editor.txt.html()
     // text1.val(editor.txt.html())
-    console.log(editor.txt.text())
+    // console.log(editor.txt.text())
   },
   methods: {
     // T添加新的文章
-    // Addnewblog: function () {
-    //   var config = {
-    //     method: 'post',
-    //     // url: 'http://175.24.28.202:8000/api/v1/subs_service',
-    //     url: 'http://localhost:8090/picture/blog',
-    //     headers: {
-    //       'Content-Type': 'application/json;charset=UTF-8'
-    //       // 'Host': 'http://175.24.28.202:80'
-    //     },
-    //     data: {
-    //       'title': 'tt',
-    //       'puber': 'name',
-    //       'puberaccount': 'puberaccount',
-    //       'content': this.blogcontent,
-    //       'token': 'token'
-    //     }}
-    // }
+    Addnewblog: function () {
+      var me = this
+      var config = {
+        method: 'post',
+        // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+        url: 'http://localhost:8090/blog/createblog',
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8'
+          // 'Host': 'http://175.24.28.202:80'
+        },
+        data: {
+          'title': this.title,
+          'puber': this.usermessage.name,
+          'puberaccount': this.$route.query.useracc,
+          'content': this.blogcontent,
+          'token': localStorage.getItem('token')
+        }}
+      axios(config)
+        .then(function (response) {
+          if (response.data.code === 1) {
+            me.$message({
+              message: response.data.msg,
+              type: 'success'
+            })
+          } else {
+            me.$message.error(response.data.msg)
+          }
+        }).catch(function (err) {
+          console.log(err)
+        })
+    }
   }
 }
 </script>
