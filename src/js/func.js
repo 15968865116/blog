@@ -36,5 +36,6 @@ async function sendaxios (methods, url, data) {
 }
 
 export {
-  getbasicmessage
+  getbasicmessage,
+  sendaxios
 }

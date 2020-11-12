@@ -23,7 +23,7 @@
           </el-tab-pane>
           <el-tab-pane label="管理文章">
             <div v-for="row in blogmessage" :key="row.ID">
-              <a>{{row.Title}}</a><el-button type="primary">修改</el-button><el-button type="warning">删除</el-button>
+              <a>{{row.Title}}</a><el-button type="primary" @click="Editblog(row.ID)">修改</el-button><el-button type="warning">删除</el-button>
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -129,7 +129,6 @@ export default {
     ]
     editor.create()
     // 通过此来写入初始值
-    editor.txt.html()
     // text1.val(editor.txt.html())
     // console.log(editor.txt.text())
   },
@@ -165,6 +164,9 @@ export default {
         }).catch(function (err) {
           console.log(err)
         })
+    },
+    Editblog: function (id) {
+      this.$router.push({path: '/editblog', query: {blog_id: id}})
     }
   }
 }

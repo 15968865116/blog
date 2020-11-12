@@ -4,6 +4,7 @@ import HelloWorld from '@/components/HelloWorld'
 import index from '@/components/index'
 import login from '@/components/login'
 import adminmanage from '@/components/adminmanage'
+import editblog from '@/components/editblog'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/adminmanage',
       name: 'adminmanage',
       component: adminmanage
+    },
+    {
+      path: '/editblog',
+      name: 'editblog',
+      component: editblog
     }
   ]
 })

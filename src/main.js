@@ -7,12 +7,13 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-import {getbasicmessage} from './js/func'
+import {getbasicmessage, sendaxios} from './js/func'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(VueAxios, axios)
 Vue.prototype.$getbasicmessage = getbasicmessage
+Vue.prototype.$sendaxios = sendaxios
 
 /* eslint-disable no-new */
 new Vue({
