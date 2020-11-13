@@ -8,22 +8,32 @@
       <body>
         <el-tabs tab-position="left" style="height: 100%;">
           <el-tab-pane label="个人资料">
-            <p>头像</p>
-            <p>昵称:<input :value="usermessage.name"></p>
-            <p></p>
-            <p></p>
-            <p></p>
+            <div class="usermessage" id='usermessage'>
+              <p>头像</p>
+              <p>昵称:<input :value="usermessage.name"></p>
+              <p></p>
+              <p></p>
+              <p></p>
+            </div>
           </el-tab-pane>
           <el-tab-pane label="新增文章">
-            <p>标题:<input v-model="title"></p>
-            <p>内容:</p><div ref="editorarea" id="editorarea">
-              <p></p>
+            <div>
+              <div style="width:50%">
+                <p>标题:<input v-model="title"></p>
+                <p>内容:</p><div ref="editorarea" id="editorarea">
+                  <p></p>
+                </div>
+              </div>
             </div>
             <button @click="Addnewblog">提交</button>
           </el-tab-pane>
           <el-tab-pane label="管理文章">
             <div v-for="row in blogmessage" :key="row.ID">
-              <a>{{row.Title}}</a><el-button type="primary" @click="Editblog(row.ID)">修改</el-button><el-button type="warning">删除</el-button>
+              <div style="height:30px">
+                <a>{{row.Title}}</a>
+                <el-button type="primary" @click="Editblog(row.ID)" style="height:30px;width:50px;float:right" plain>修改</el-button>
+                <el-button type="warning" style="height:30px;width:50px;float:right" plain>删除</el-button>
+              </div>
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -34,7 +44,7 @@
 import E from 'wangeditor'
 import axios from 'axios'
 export default {
-  data () {
+  data: function () {
     return {
       base64: '',
       blogcontent: '',
@@ -48,7 +58,9 @@ export default {
     var me = this
     this.$getbasicmessage(this.$route.query.useracc)
     this.acc = this.$route.query.useracc
-    window.account = this.acc
+    if (!this.$route.query.useracc) {
+      me.$message.error('请重新登录')
+    }
     var editor = new E(document.getElementById('editorarea'))
     editor.config.height = 500
     editor.config.zIndex = 1
@@ -92,7 +104,7 @@ export default {
           data: {
             'img': reader.result,
             'token': localStorage.getItem('token'),
-            'puberaccount': window.account
+            'puberaccount': me.acc
           }}
         axios(config)
           .then(function (response) {
@@ -224,5 +236,9 @@ pre code {
 /* ul ol 样式 */
 ul, ol {
   margin: 10px 0 10px 20px;
+}
+.usermessage {
+  width: 50%;
+  background-color: black;
 }
 </style>

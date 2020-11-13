@@ -19,7 +19,7 @@
 import E from 'wangeditor'
 import axios from 'axios'
 export default {
-  data () {
+  data: function () {
     return {
       editblogcontent: '',
       blognow: '',
@@ -111,14 +111,14 @@ export default {
     // text1.val(editor.txt.html())
     // console.log(editor.txt.text())
     this.Initvalue()
-    editor.txt.html(window.blogeditnow.Content)
-    document.getElementById('title').value = window.blogeditnow.Title
+    editor.txt.html(this.editblogcontent)
+    document.getElementById('title').value = this.editblogcontent.Title
   },
   methods: {
     Initvalue: async function () {
       var geturl = 'http://localhost:8090/blog/getspecificblog?id=' + this.$route.query.blog_id
       var blogmes = await this.$sendaxios('get', geturl, '')
-      window.blogeditnow = blogmes.result
+      this.editblogcontent = blogmes.result
     },
     Editblog: function () {
     }

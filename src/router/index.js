@@ -5,6 +5,7 @@ import index from '@/components/index'
 import login from '@/components/login'
 import adminmanage from '@/components/adminmanage'
 import editblog from '@/components/editblog'
+import myblogpage from '@/components/myblogpage'
 
 Vue.use(Router)
 
@@ -34,6 +35,11 @@ export default new Router({
       path: '/editblog',
       name: 'editblog',
       component: editblog
+    },
+    {
+      path: '/myblog',
+      name: 'myblog',
+      component: myblogpage
     }
   ]
 })
