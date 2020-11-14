@@ -8,20 +8,28 @@
         <body>
             <div style="width:100%;text-align:center;">
                 <div class="left" id="left">
-                  <el-card class="box-card">
-                    <div slot="header" class="clearfix">
-                      <span>简介</span>
-                      <!-- <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button> -->
+                  <div>
+                    <el-avatar shape="square" :size="80" src="http://localhost:8090/blogimg/youneverknow1605097981.jpg"></el-avatar>
+                    <!-- 这里打算做一个标签的for循环 !-->
+                    <div style="display:block-inline">
+                      <el-tag>标签一</el-tag>
+                      <el-tag>标签一</el-tag>
+                      <el-tag>标签一</el-tag>
                     </div>
-                    <el-avatar shape="square" :size="50" src=""></el-avatar>
-                    <p>昵称:</p>
-                    <p>联系方式:</p>
-                  </el-card>
+                    <div>
+                      <span>{{userinfo.name}}</span>
+                      <el-divider direction="vertical"></el-divider>
+                      <span></span>
+                      <el-divider direction="vertical"></el-divider>
+                      <span></span>
+                    </div>
+                  </div>
                 </div>
                 <div class="mid" id="mid">
+                  <el-divider style="margin-top: 10px;margin-bottom: 10px;" content-position="left">我只是一条分割线</el-divider>
                     <div v-for="row in bloginfo.slice((currentpage-1)*10,currentpage*10)" :key="row.ID">
-                        <div style="">
-                           <el-link type="primary" style="font-size:18px" href="http://www.baidu.com">{{row.Title}}</el-link><br>
+                        <div style="margin-top: 10px;margin-bottom: 10px;">
+                           <el-link type="primary" style="font-size:18px" :href="'http://localhost:8080/#/spcific?blog_id='+row.ID">{{row.Title}}</el-link><br>
                             <a style="font-size:13px"><font style="color:#909399">发布日期：{{row.Pubdate}}</font></a>
                             <a style="font-size:13px"><font style="color:#909399">最新更新：{{row.Updatedate}}</font></a>
                             <a style="font-size:13px"><font style="color:#909399">作者：{{row.Puber}}</font></a>
@@ -53,7 +61,6 @@ export default {
   },
   mounted () {
     this.Initvalue()
-    document.getElementById('mid').style.height = String(window.innerHeight) + 'px'
   },
   methods: {
     Initvalue: async function () {
@@ -98,15 +105,16 @@ html,body {
     width: 100%;
 }
 .left {
+    margin-top: 10px;
     height: 100%;
-    width: 19%;
-    background-color: green;
-    display: inline-block;
-    text-align: center;
+    width: 100%;
+    background-color: white;
 }
 .mid {
+    margin-top: 10px;
+    margin-bottom: 10px;
     height: 100%;
-    width: 60%;
+    width: 70%;
     display: inline-block;
     text-align: center;
 }

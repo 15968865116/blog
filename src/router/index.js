@@ -6,6 +6,7 @@ import login from '@/components/login'
 import adminmanage from '@/components/adminmanage'
 import editblog from '@/components/editblog'
 import myblogpage from '@/components/myblogpage'
+import showspecific from '@/components/showspecific'
 
 Vue.use(Router)
 
@@ -40,6 +41,11 @@ export default new Router({
       path: '/myblog',
       name: 'myblog',
       component: myblogpage
+    },
+    {
+      path: '/spcific',
+      name: 'spcific',
+      component: showspecific
     }
   ]
 })
