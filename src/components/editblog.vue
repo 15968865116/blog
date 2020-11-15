@@ -110,15 +110,16 @@ export default {
     // 通过此来写入初始值
     // text1.val(editor.txt.html())
     // console.log(editor.txt.text())
-    this.Initvalue()
-    editor.txt.html(this.editblogcontent)
-    document.getElementById('title').value = this.editblogcontent.Title
+    this.Initvalue(editor)
   },
   methods: {
-    Initvalue: async function () {
+    Initvalue: async function (editor) {
       var geturl = 'http://localhost:8090/blog/getspecificblog?id=' + this.$route.query.blog_id
       var blogmes = await this.$sendaxios('get', geturl, '')
       this.editblogcontent = blogmes.result
+      console.log(this.editblogcontent)
+      editor.txt.html(this.editblogcontent.Content)
+      document.getElementById('title').value = this.editblogcontent.Title
     },
     Editblog: function () {
     }

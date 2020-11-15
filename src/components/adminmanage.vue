@@ -6,37 +6,45 @@
           <title>管理页面</title>
       </head>
       <body>
-        <el-tabs tab-position="left" style="height: 100%;">
-          <el-tab-pane label="个人资料">
-            <div class="usermessage" id='usermessage'>
-              <p>头像</p>
-              <p>昵称:<input :value="usermessage.name"></p>
-              <p></p>
-              <p></p>
-              <p></p>
+        <el-collapse v-model="activeNames" @change="handleChange">
+          <el-collapse-item title="个人资料" name="1" style="text-align:center">
+            <div style="width:50%;float:left">
+              <p>头像 </p><div class="block"><el-avatar shape="square" :size="50" :src="squareUrl"></el-avatar></div>
+              <p>昵称:{{usermessage.name}}</p>
+              <p>联系方式</p>
+              <p>标签</p>
+              <p>简介</p>
             </div>
-          </el-tab-pane>
-          <el-tab-pane label="新增文章">
-            <div>
-              <div style="width:50%">
-                <p>标题:<input v-model="title"></p>
-                <p>内容:</p><div ref="editorarea" id="editorarea">
-                  <p></p>
-                </div>
+            <div style="width:50%;float:right">
+              <h4>修改个人资料</h4>
+              <input type="file"
+               accept="image/*"
+               @change="chooseImg" />
+              <p>昵称:<input></p>
+              <p>联系方式<input></p>
+              <p>标签<input></p>
+              <p>简介<input></p>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="新增文章" name="2">
+            <div id="addnew">
+              <p><el-input v-model="title" placeholder="请输入标题"></el-input></p>
+              <p>内容:</p><div ref="editorarea" id="editorarea">
               </div>
-            </div>
-            <button @click="Addnewblog">提交</button>
-          </el-tab-pane>
-          <el-tab-pane label="管理文章">
+            </div><br>
+            <el-button type="success" @click="Addnewblog" size="medium">新增博文</el-button>
+          </el-collapse-item>
+          <el-collapse-item title="管理文章" name="3" style="text-align:center">
             <div v-for="row in blogmessage" :key="row.ID">
-              <div style="height:30px">
+              <div>
                 <a>{{row.Title}}</a>
-                <el-button type="primary" @click="Editblog(row.ID)" style="height:30px;width:50px;float:right" plain>修改</el-button>
-                <el-button type="warning" style="height:30px;width:50px;float:right" plain>删除</el-button>
+                <el-button type="primary" size="small" @click="Editblog(row.ID)" style="float:right">修改</el-button>
+                <el-button type="warning" size="small" style="float:right">删除</el-button>
               </div>
+              <el-divider></el-divider>
             </div>
-          </el-tab-pane>
-        </el-tabs>
+          </el-collapse-item>
+        </el-collapse>
       </body>
     </html>
 </template>
@@ -51,7 +59,12 @@ export default {
       usermessage: {},
       blogmessage: [],
       title: '',
-      acc: ''
+      acc: '',
+      activeNames: ['1'],
+      data: '',
+      imageUrl: '',
+      Imageco: '',
+      squareUrl: ''
     }
   },
   mounted () {
@@ -62,7 +75,7 @@ export default {
       me.$message.error('请重新登录')
     }
     var editor = new E(document.getElementById('editorarea'))
-    editor.config.height = 500
+    editor.config.height = 300
     editor.config.zIndex = 1
     // var text1 = document.getElementById('text1')
     editor.config.onchange = function (html) {
@@ -179,66 +192,72 @@ export default {
     },
     Editblog: function (id) {
       this.$router.push({path: '/editblog', query: {blog_id: id}})
+    },
+    handleChange: function (val) {
+      console.log(val)
+    },
+    chooseImg (event) {
+      let file = event.target.files[0]
+      console.log(file)
+      var me = this
+      let reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = function (e) {
+        // 这里的e.target就是reader
+        // console.log(reader.result)
+        // reader.result就是图片的base64字符串
+        var config = {
+          method: 'post',
+          // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+          url: 'http://localhost:8090/picture/portrait',
+          headers: {
+            'Content-Type': 'application/json;charset=UTF-8'
+            // 'Host': 'http://175.24.28.202:80'
+          },
+          data: {
+            'img': reader.result,
+            'token': localStorage.getItem('token'),
+            'puberaccount': me.acc
+          }}
+        axios(config)
+          .then(function (response) {
+            if (response.data.code === 1) {
+              me.squareUrl = response.data.urlpath
+            } else {
+              window.alert('插入失败')
+            }
+          })
+      }
     }
   }
 }
 </script>
 <style scoped>
-  * {
-    padding: 0px;
-    margin: 0px;
-  }
   html, body {
     width: 100%;
     height: 100%;
   }
-  /* table 样式 */
-table {
-  border-top: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-}
-table td,
-table th {
-  border-bottom: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  padding: 3px 5px;
-}
-table th {
-  border-bottom: 2px solid #ccc;
-  text-align: center;
-}
-
-/* blockquote 样式 */
-blockquote {
-  display: block;
-  border-left: 8px solid #d0e5f2;
-  padding: 5px 10px;
-  margin: 10px 0;
-  line-height: 1.4;
-  font-size: 100%;
-  background-color: #f1f1f1;
-}
-
-/* code 样式 */
-code {
-  display: inline-block;
-  *display: inline;
-  *zoom: 1;
-  background-color: #f1f1f1;
-  border-radius: 3px;
-  padding: 3px 5px;
-  margin: 0 3px;
-}
-pre code {
-  display: block;
-}
-
-/* ul ol 样式 */
-ul, ol {
-  margin: 10px 0 10px 20px;
-}
-.usermessage {
-  width: 50%;
-  background-color: black;
-}
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
 </style>

@@ -6,7 +6,8 @@
             <title>{{blogdata.Title}}</title>
         </head>
         <!-- 个人信息 -->
-        <div style="width:100%;text-align:center">
+        <body class="spbg">
+        <div style="width:100%;text-align:center" class="bgi">
           <div class="left" id="left">
               <div>
                 <el-avatar shape="square" :size="80" src="http://localhost:8090/blogimg/youneverknow1605097981.jpg"></el-avatar>
@@ -28,15 +29,16 @@
           <div class="mid" id="mid">
             <el-divider style="margin-top: 10px;margin-bottom: 10px;" content-position="left">我只是一条分割线</el-divider>
             <!-- 标题区域 -->
-            <div>{{blogdata.Title}}</div>
+            <h1>{{blogdata.Title}}</h1><br>
             <!-- 时间线 -->
             <a style="font-size:13px"><font style="color:#909399">发布日期：{{blogdata.Pubdate}}</font></a><br>
             <a style="font-size:13px"><font style="color:#909399">最新更新：{{blogdata.Updatedate}}</font></a><br>
-            <a style="font-size:13px"><font style="color:#909399">作者：{{blogdata.Puber}}</font></a><br>
+            <a style="font-size:13px"><font style="color:#909399">作者：{{blogdata.Puber}}</font></a><br><br><br>
             <!-- 具体内容 -->
             <div id="content">{{blogdata.Content}}</div>
           </div>
         </div>
+        </body>
     </html>
 </template>
 <script>
@@ -51,6 +53,7 @@ export default {
   },
   mounted () {
     this.getblogdata()
+    // document.getElementById('mid').style.minHeight = String(window.innerHeight) + 'px'
     // document.getElementById('content').append(this.blogdata.Content)
   },
   methods: {
@@ -82,14 +85,11 @@ export default {
 </script>
 <style scoped>
 .left {
-    margin-top: 10px;
     height: 100%;
     width: 100%;
-    background-color: white;
     text-align: center;
 }
 .mid {
-    margin-top: 10px;
     margin-bottom: 10px;
     height: 100%;
     width: 70%;
