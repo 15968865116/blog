@@ -36,6 +36,8 @@
             <a style="font-size:13px"><font style="color:#909399">作者：{{blogdata.Puber}}</font></a><br><br><br>
             <!-- 具体内容 -->
             <div id="content">{{blogdata.Content}}</div>
+            <el-divider style="margin-top: 10px;margin-bottom: 10px;" content-position="left"></el-divider>
+            <p style="text-align:left">评论区</p>
           </div>
         </div>
         </body>

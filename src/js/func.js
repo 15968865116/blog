@@ -8,7 +8,7 @@ async function getbasicmessage (account) {
   var blogurl = 'http://localhost:8090/blog/getblog?name='
   var blogpostdata = ''
   this.usermessage = await sendaxios('post', userurl, userpostdata)
-  blogurl = blogurl + this.usermessage.name
+  blogurl = blogurl + this.usermessage.umsg.name
   var blogmes = await sendaxios('get', blogurl, blogpostdata)
   this.blogmessage = blogmes.result
 }

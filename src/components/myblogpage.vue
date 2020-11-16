@@ -12,14 +12,17 @@
                     <el-avatar shape="square" :size="80" src="http://localhost:8090/blogimg/youneverknow1605097981.jpg"></el-avatar>
                     <!-- 这里打算做一个标签的for循环 !-->
                     <div style="display:block-inline">
-                      <el-tag>标签一</el-tag>
-                      <el-tag>标签一</el-tag>
-                      <el-tag>标签一</el-tag>
+                      {{userinfo.intro}}
+                    </div>
+                    <div style="display:block-inline">
+                      <a v-for="item in tag" :key="item">
+                        <el-tag>{{item}}</el-tag>
+                      </a>
                     </div>
                     <div>
                       <span>{{userinfo.name}}</span>
                       <el-divider direction="vertical"></el-divider>
-                      <span></span>
+                      <span>{{userinfo.email}}</span>
                       <el-divider direction="vertical"></el-divider>
                       <span></span>
                     </div>
@@ -54,8 +57,9 @@
 export default {
   data: function () {
     return {
-      userinfo: '',
+      userinfo: {},
       bloginfo: '',
+      tag: [],
       total: 0,
       currentpage: 1
     }
@@ -71,7 +75,10 @@ export default {
     Initvalue: async function () {
       var geturluser = 'http://localhost:8090/user/getinfosingle?name=Elephant'
       var usergmes = await this.$sendaxios('get', geturluser, '')
-      this.userinfo = usergmes
+      this.userinfo = usergmes.umsg
+      console.log(this.userinfo)
+      this.tag = this.userinfo.tag.split(';')
+      console.log(this.tag)
       var geturlblog = 'http://localhost:8090/blog/getblog?name=Elephant'
       var blogmes = await this.$sendaxios('get', geturlblog, '')
       this.bloginfo = blogmes.result
@@ -80,8 +87,6 @@ export default {
         this.bloginfo[i].Updatedate = this.timestampToTime(this.bloginfo[i].Updatedate)
       }
       this.total = this.bloginfo.length
-      console.log(this.userinfo)
-      console.log(this.bloginfo)
     },
     timestampToTime: function (timestamp) {
       // 时间戳为10位需*1000，时间戳为13位的话不需乘1000

@@ -75,6 +75,7 @@ export default {
               type: 'success'
             })
             localStorage.setItem('token', response.data.token)
+            localStorage.setItem('account', me.user)
             me.$router.push({path: '/adminmanage', query: {useracc: me.user}})
           } else {
             me.$message.error(response.data.msg)
