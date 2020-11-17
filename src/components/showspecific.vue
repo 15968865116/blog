@@ -13,14 +13,17 @@
                 <el-avatar shape="square" :size="80" src="http://localhost:8090/blogimg/youneverknow1605097981.jpg"></el-avatar>
                 <!-- 这里打算做一个标签的for循环 !-->
                 <div style="display:block-inline">
-                  <el-tag>标签一</el-tag>
-                  <el-tag>标签一</el-tag>
-                  <el-tag>标签一</el-tag>
+                  {{userinfo.intro}}
+                </div>
+                <div style="display:block-inline">
+                  <a v-for="item in tag" :key="item">
+                    <el-tag>{{item}}</el-tag>
+                  </a>
                 </div>
                 <div>
                   <span>{{userinfo.name}}</span>
                   <el-divider direction="vertical"></el-divider>
-                  <span></span>
+                  <span>{{userinfo.email}}</span>
                   <el-divider direction="vertical"></el-divider>
                   <span></span>
                 </div>
@@ -37,20 +40,56 @@
             <!-- 具体内容 -->
             <div id="content">{{blogdata.Content}}</div>
             <el-divider style="margin-top: 10px;margin-bottom: 10px;" content-position="left"></el-divider>
-            <p style="text-align:left">评论区</p>
+            <p style="text-align:left">评论区</p><br>
+            <div style="text-align:left" v-for="showcomment in showcomments" :key="showcomment.id">
+              <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                  <span>{{showcomment.commentname}}</span>
+                  <div style="font-size:13px;text-align:right">
+                    <font style="color:#909399">
+                      {{showcomment.commenttime}}
+                    </font>
+                  </div>
+                </div>
+                <div >
+                  {{showcomment.comments}}
+                </div>
+              </el-card><br>
+            </div>
+            <el-divider style="margin-top: 10px;margin-bottom: 10px;" content-position="left"></el-divider>
+            <p style="text-align:left">发表评论</p>
+            <div style="text-align:left">
+              <el-input style="width:30%" v-model="commentname" placeholder="昵称"></el-input><br><br>
+            </div>
+            <div style="text-align:left">
+              <el-input
+                type="textarea"
+                :rows="2"
+                placeholder="请输入内容"
+                v-model="comment">
+              </el-input><br><br>
+            </div>
+            <div style="text-align:left">
+              <el-button type="primary" @click="pubcomment">发表评论</el-button>
+            </div>
           </div>
         </div>
         </body>
     </html>
 </template>
 <script>
+import axios from 'axios'
 export default {
   data: function () {
     return {
       bolgtitle: '',
       blogdataresult: '',
       blogdata: '',
-      userinfo: ''
+      userinfo: {},
+      commentname: '',
+      comment: '',
+      tag: {},
+      showcomments: {}
     }
   },
   mounted () {
@@ -62,7 +101,8 @@ export default {
     getblogdata: async function () {
       var geturluser = 'http://localhost:8090/user/getinfosingle?name=Elephant'
       var usergmes = await this.$sendaxios('get', geturluser, '')
-      this.userinfo = usergmes
+      this.userinfo = usergmes.umsg
+      this.tag = this.userinfo.tag.split(';')
       var url = 'http://localhost:8090/blog/getspecificblog?id=' + this.$route.query.blog_id
       this.blogdataresult = await this.$sendaxios('get', url, '')
       console.log(this.blogdataresult)
@@ -70,6 +110,12 @@ export default {
       this.blogdata.Pubdate = this.timestampToTime(this.blogdata.Pubdate)
       this.blogdata.Updatedate = this.timestampToTime(this.blogdata.Updatedate)
       document.getElementById('content').innerHTML = String(this.blogdata.Content)
+      var commenturl = 'http://localhost:8090/comment/selectcomment?blogid=' + this.$route.query.blog_id
+      var commentdata = await this.$sendaxios('get', commenturl, '')
+      this.showcomments = commentdata.result
+      for (var i = 0; i < this.showcomments.length; i++) {
+        this.showcomments[i].commenttime = this.timestampToTime(this.showcomments[i].commenttime)
+      }
     },
     timestampToTime: function (timestamp) {
       // 时间戳为10位需*1000，时间戳为13位的话不需乘1000
@@ -81,6 +127,40 @@ export default {
       var m = date.getMinutes() + ':'
       var s = date.getSeconds()
       return Y + M + D + h + m + s
+    },
+    pubcomment: function () {
+      var dataforcomment = {
+        'commentname': this.commentname,
+        'comments': this.comment,
+        'blogid': parseInt(this.$route.query.blog_id)
+      }
+      var me = this
+      var config = {
+        method: 'post',
+        // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+        url: 'http://localhost:8090/comment/createcomment',
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8'
+          // 'Host': 'http://175.24.28.202:80'
+        },
+        data: dataforcomment
+      }
+      axios(config)
+        .then(function (response) {
+          if (response.data.code === 1) {
+            me.$message({
+              message: '评论成功' + '!',
+              type: 'success'
+            })
+            me.comment = ''
+            response.data.result.commenttime = me.timestampToTime(response.data.result.commenttime)
+            me.showcomments.push(response.data.result)
+          } else {
+            me.$message.error(response.data.msg)
+          }
+        }).catch(function (error) {
+          console.log(error)
+        })
     }
   }
 }
