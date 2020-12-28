@@ -11,7 +11,7 @@
         <canvas id="Canvas" class="canvasclass" style="z-index:1">您的浏览器不支持Canvas</canvas>
         <div class="bottommark" id="bottommark" @mousemove="beenchose('bottommark')" @mouseout="beenmove('bottommark')">
           <font id="font">
-            解
+            <a href="http://localhost:8080/#/Mypage">解</a>
           </font>
         </div>
       </div>
@@ -141,6 +141,10 @@ export default {
     animate: function () {
       requestAnimationFrame(this.animate)
       let canvas = document.getElementById('Canvas')
+      // console.log(window.innerWidth)
+      if (canvas === null) {
+        return
+      }
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight - 4
       var ctx = canvas.getContext('2d')
@@ -302,4 +306,5 @@ export default {
       height: 100%;
       width:100%;
     }
+    a{ TEXT-DECORATION:none }
 </style>

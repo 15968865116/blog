@@ -8,24 +8,8 @@
       <body>
         <el-collapse v-model="activeNames" @change="handleChange">
           <el-collapse-item title="个人资料" name="1" style="text-align:center">
-            <div style="width:50%;float:left">
-              <p>头像 </p><div class="block"><el-avatar shape="square" :size="50" :src="usermessage.portrait"></el-avatar></div>
-              <el-form label-position="left" inline class="demo-table-expand">
-                <el-form-item label="昵称:">
-                  <span>{{ usermessage.name }}</span>
-                </el-form-item>
-                <el-form-item label="联系方式:">
-                  <span>{{ usermessage.email }}</span>
-                </el-form-item><br>
-                <el-form-item label="标签:">
-                  <span>{{ usermessage.tag }}</span>
-                </el-form-item>
-                <el-form-item label="简介:">
-                  <span>{{ usermessage.intro }}</span>
-                </el-form-item>
-              </el-form>
-            </div>
-            <div style="width:50%;float:right">
+            <div style="width:100%">
+              <p>头像 </p><div class="block"><el-avatar shape="square" :size="50" :src="squareUrl"></el-avatar></div>
               <h4>修改个人资料</h4>
               <p>上传头像</p>
               <div class="inputimg">
@@ -34,6 +18,7 @@
                @change="chooseImg" />
               </div>
               <p>
+                <label>昵称:</label>
                 <el-input
                   style = "width:80%;"
                   placeholder="请输入昵称"
@@ -42,6 +27,7 @@
                 </el-input>
               </p>
               <p>
+                <label>邮箱:</label>
                 <el-input
                   style = "width:80%;"
                   placeholder="请输入邮箱"
@@ -50,6 +36,7 @@
                 </el-input>
               </p>
               <p>
+                <label>标签:</label>
                 <el-input
                   style = "width:80%;"
                   placeholder="请输入标签"
@@ -58,6 +45,7 @@
                 </el-input>
               </p>
               <p>
+                <label>简介:</label>
                 <el-input
                   style = "width:80%;"
                   placeholder="请输入简介"
@@ -70,7 +58,22 @@
           </el-collapse-item>
           <el-collapse-item title="新增文章" name="2">
             <div id="addnew">
-              <p><el-input v-model="title" placeholder="请输入标题"></el-input></p>
+              <p><el-input v-model="title" placeholder="请输入标题"></el-input></p><br>
+              <p><font>请选择文章分类</font>
+                  <el-select
+                    v-model="valueforcategory"
+                    filterable
+                    allow-create
+                    default-first-option
+                    placeholder="请选择文章标签">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                    </el-option>
+                  </el-select>
+              </p>
               <p>内容:</p><div ref="editorarea" id="editorarea">
               </div>
             </div><br>
@@ -96,6 +99,10 @@ import axios from 'axios'
 export default {
   data: function () {
     return {
+      valueforcategory: '',
+      options: [{'lable': 'aaa', 'value': 'bbb'},
+        {'lable': 'aaa', 'value': 'aaas'},
+        {'lable': 'aaa', 'value': 'none'}],
       base64: '',
       blogcontent: '',
       usermessage: {},
@@ -143,6 +150,7 @@ export default {
           'puber': this.usermessage.name,
           'puberaccount': this.$route.query.useracc,
           'content': this.blogcontent,
+          'categoryName': this.valueforcategory,
           'token': localStorage.getItem('token')
         }}
       axios(config)
@@ -158,6 +166,8 @@ export default {
         }).catch(function (err) {
           console.log(err)
         })
+      this.title = ''
+      this.blogcontent = ''
     },
     Editblog: function (id) {
       this.$router.push({path: '/editblog', query: {blog_id: id}})
@@ -190,8 +200,10 @@ export default {
           }}
         axios(config)
           .then(function (response) {
+            console.log(response)
             if (response.data.code === 1) {
               me.squareUrl = response.data.urlpath
+              console.log(me.squareUrl)
             } else {
               window.alert('插入失败')
             }
@@ -254,6 +266,12 @@ export default {
       blogurl = blogurl + message.umsg.name
       var blogmes = await this.$sendaxios('get', blogurl, blogpostdata)
       this.blogmessage = blogmes.result
+      this.udtag = message.umsg.tag
+      this.udintro = message.umsg.intro
+      this.udemail = message.umsg.email
+      this.udname = message.umsg.name
+      this.squareUrl = message.umsg.portrait
+      console.log(this.squareUrl)
     },
     Initeditor: function () {
       var me = this
