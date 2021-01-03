@@ -67,10 +67,10 @@
                     default-first-option
                     placeholder="请选择文章标签">
                     <el-option
-                      v-for="item in options"
+                      v-for="item in categorylist"
                       :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
+                      :value="item.value"
+                      :name="item.label">
                     </el-option>
                   </el-select>
               </p>
@@ -84,7 +84,26 @@
               <div>
                 <a>{{row.Title}}</a>
                 <el-button type="primary" size="small" @click="Editblog(row.ID)" style="float:right">修改</el-button>
-                <el-button type="warning" size="small" style="float:right">删除</el-button>
+                <el-button type="warning" size="small" style="float:right" @click="Deleteblog(row.ID)">删除</el-button>
+              </div>
+              <el-divider></el-divider>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="管理文章分类" name="4">
+            <div v-for="row in categorylist" :key="row.label">
+              <div>
+                <a>{{row.value}}</a>
+                <el-button type="warning" size="small" style="float:right" @click="Deletecategory(row)">删除</el-button>
+              </div>
+              <el-divider></el-divider>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="审核评论" name="5">
+            <div v-for="row in comment" :key="row.id">
+              <div>
+                <a>评论文章：{{row.blogid}}，评论详情：{{row.commentname}}:{{row.comments}},评论时间：{{row.commenttime}}</a>
+                <el-button type="primary" size="small" @click="CheckComment(row.id)" style="float:right">审核通过</el-button>
+                <el-button type="warning" size="small" style="float:right" @click="DeleteComment(row.ID)">删除</el-button>
               </div>
               <el-divider></el-divider>
             </div>
@@ -100,16 +119,14 @@ export default {
   data: function () {
     return {
       valueforcategory: '',
-      options: [{'lable': 'aaa', 'value': 'bbb'},
-        {'lable': 'aaa', 'value': 'aaas'},
-        {'lable': 'aaa', 'value': 'none'}],
+      categorylist: [],
       base64: '',
       blogcontent: '',
       usermessage: {},
       blogmessage: {},
       title: '',
       acc: '',
-      activeNames: ['1'],
+      activeNames: [],
       data: '',
       imageUrl: '',
       Imageco: '',
@@ -118,7 +135,8 @@ export default {
       udintro: '',
       udemail: '',
       udname: '',
-      editor: null
+      editor: null,
+      comment: []
     }
   },
   mounted: function () {
@@ -142,7 +160,9 @@ export default {
         // url: 'http://175.24.28.202:8000/api/v1/subs_service',
         url: 'http://localhost:8090/blog/createblog',
         headers: {
-          'Content-Type': 'application/json;charset=UTF-8'
+          'Content-Type': 'application/json;charset=UTF-8',
+          'puberaccount': this.$route.query.useracc,
+          'token': localStorage.getItem('token')
           // 'Host': 'http://175.24.28.202:80'
         },
         data: {
@@ -173,7 +193,6 @@ export default {
       this.$router.push({path: '/editblog', query: {blog_id: id}})
     },
     handleChange: function (val) {
-      console.log(val)
     },
     chooseImg (event) {
       let file = event.target.files[0]
@@ -246,22 +265,15 @@ export default {
           console.log(error)
         })
     },
+    // 获取可以拆开
     getbasicmessage: async function (account) {
-      var userurl = 'http://localhost:8090/user/getinfo'
+      var userurl = 'http://localhost:8090/user/info'
       var userpostdata = {
-        'account': account,
-        'token': localStorage.getItem('token')
+        'account': account
       }
-      var blogurl = 'http://localhost:8090/blog/getblog?name='
+      var blogurl = 'http://localhost:8090/blog/blog?name='
       var blogpostdata = ''
-      var message = await this.$sendaxios('post', userurl, userpostdata)
-      // this.usermessage = {
-      //   'name': message.umsg.name,
-      //   'portrait': message.umsg.portrait,
-      //   'email': message.umsg.email,
-      //   'intro': message.umsg.intro,
-      //   'tag': message.umsg.tag
-      // }
+      var message = await this.$sendaxiosandtoken(account, localStorage.getItem('token'), 'post', userurl, userpostdata)
       this.usermessage = message.umsg
       blogurl = blogurl + message.umsg.name
       var blogmes = await this.$sendaxios('get', blogurl, blogpostdata)
@@ -271,7 +283,14 @@ export default {
       this.udemail = message.umsg.email
       this.udname = message.umsg.name
       this.squareUrl = message.umsg.portrait
-      console.log(this.squareUrl)
+      var categoryurl = 'http://localhost:8090/category/allcategoryAdimin'
+      var categorymes = await this.$sendaxios('get', categoryurl, blogpostdata)
+      for (var i = 0; i < categorymes.category.length; i++) {
+        this.categorylist.push({'value': categorymes.category[i].name, 'lable': categorymes.category[i].i_d})
+      }
+      var commenturl = 'http://localhost:8090/comment/commentnotchecked'
+      var commentmessage = await this.$sendaxiosandtoken(account, localStorage.getItem('token'), 'get', commenturl, '')
+      this.comment = commentmessage.result
     },
     Initeditor: function () {
       var me = this
@@ -354,6 +373,225 @@ export default {
         'Courier New'
       ]
       this.editor.create()
+    },
+    Deleteblog: async function (val) {
+      this.$confirm('此操作将永久删除该博客, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        var data = {
+          'id': val
+        }
+        var config = {
+          method: 'post',
+          // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+          url: 'http://localhost:8090/blog/deleteblog',
+          headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'puberaccount': this.$route.query.useracc,
+            'token': localStorage.getItem('token')
+            // 'Host': 'http://175.24.28.202:80'
+          },
+          data: data
+        }
+        var me = this
+        axios(config)
+          .then(function (response) {
+            if (response.data.code === 1) {
+              me.$message({
+                type: 'success',
+                message: '删除成功!'
+              })
+              me.$router.go(0)
+            } else {
+              me.$message.error(response.data.msg)
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    Deletecategory: function (val) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$confirm('是否同时删除对应文章?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var data = {
+            'i_d': val.lable,
+            'name': val.value,
+            'ifdelete_article': true
+          }
+          var config = {
+            method: 'delete',
+            // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+            url: 'http://localhost:8090/category/category',
+            headers: {
+              'Content-Type': 'application/json;charset=UTF-8',
+              'puberaccount': this.$route.query.useracc,
+              'token': localStorage.getItem('token')
+              // 'Host': 'http://175.24.28.202:80'
+            },
+            data: data
+          }
+          var me = this
+          axios(config)
+            .then(function (response) {
+              if (response.data.code === 1) {
+                me.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                })
+                me.$router.go(0)
+              } else {
+                me.$message.error(response.data.msg)
+              }
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+        }).catch(() => {
+          var data = {
+            'i_d': val.lable,
+            'name': val.value,
+            'ifdelete_article': false
+          }
+          var config = {
+            method: 'delete',
+            // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+            url: 'http://localhost:8090/category/category',
+            headers: {
+              'Content-Type': 'application/json;charset=UTF-8',
+              'puberaccount': this.$route.query.useracc,
+              'token': localStorage.getItem('token')
+              // 'Host': 'http://175.24.28.202:80'
+            },
+            data: data
+          }
+          var me = this
+          axios(config)
+            .then(function (response) {
+              if (response.data.code === 1) {
+                me.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                })
+                me.$router.go(0)
+              } else {
+                me.$message.error(response.data.msg)
+              }
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    CheckComment: function (val) {
+      this.$confirm('此操作将审核该评论, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        var data = {
+          'id': val,
+          'if_check': 1
+        }
+        var config = {
+          method: 'put',
+          // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+          url: 'http://localhost:8090/comment/comment',
+          headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'puberaccount': this.$route.query.useracc,
+            'token': localStorage.getItem('token')
+            // 'Host': 'http://175.24.28.202:80'
+          },
+          data: data
+        }
+        var me = this
+        axios(config)
+          .then(function (response) {
+            if (response.data.code === 1) {
+              me.$message({
+                type: 'success',
+                message: '审核成功!'
+              })
+              me.$router.go(0)
+            } else {
+              me.$message.error(response.data.msg)
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    DeleteComent: function (val) {
+      this.$confirm('此操作将删除该评论, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        var data = {
+          'id': val
+        }
+        var config = {
+          method: 'put',
+          // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+          url: 'http://localhost:8090/comment/comment',
+          headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'puberaccount': this.$route.query.useracc,
+            'token': localStorage.getItem('token')
+            // 'Host': 'http://175.24.28.202:80'
+          },
+          data: data
+        }
+        var me = this
+        axios(config)
+          .then(function (response) {
+            if (response.data.code === 1) {
+              me.$message({
+                type: 'success',
+                message: '删除成功!'
+              })
+              me.$router.go(0)
+            } else {
+              me.$message.error(response.data.msg)
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
   }
 }

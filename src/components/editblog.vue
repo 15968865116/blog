@@ -8,6 +8,21 @@
       <body>
         <div>
             <p>标题：</p><p><el-input v-model="title" placeholder="请输入标题"></el-input></p><br>
+            <p><font>请选择文章分类</font>
+                  <el-select
+                    v-model="valueforcategory"
+                    filterable
+                    allow-create
+                    default-first-option
+                    placeholder="请选择文章标签">
+                    <el-option
+                      v-for="item in categorylist"
+                      :key="item.value"
+                      :value="item.value"
+                      :label="item.value">
+                    </el-option>
+                  </el-select>
+            </p>
             <div ref="editorarea" id="editorarea">
             </div>
             <el-button type="success" @click="Editblog" size="medium">修改</el-button>
@@ -25,7 +40,9 @@ export default {
       editblogcontent: {},
       blognow: '',
       title: '',
-      editor: null
+      editor: null,
+      categorylist: [],
+      valueforcategory: ''
     }
   },
   mounted: function () {
@@ -34,11 +51,19 @@ export default {
   },
   methods: {
     Initvalue: async function (editor) {
-      var geturl = 'http://localhost:8090/blog/getspecificblog?id=' + this.$route.query.blog_id
+      var geturl = 'http://localhost:8090/blog/specificblog?id=' + this.$route.query.blog_id
       var blogmes = await this.$sendaxios('get', geturl, '')
       this.editblogcontent = blogmes.result
       editor.txt.html(this.editblogcontent.Content)
       this.title = this.editblogcontent.Title
+      var categoryurl = 'http://localhost:8090/category/allcategoryAdimin'
+      var categorymes = await this.$sendaxios('get', categoryurl, '')
+      for (var i = 0; i < categorymes.category.length; i++) {
+        if (categorymes.category[i].i_d === blogmes.result.CategoryID) {
+          this.valueforcategory = categorymes.category[i].name
+        }
+        this.categorylist.push({'value': categorymes.category[i].name, 'lable': categorymes.category[i].i_d})
+      }
     },
     Editblog: function () {
       var datare = {
@@ -46,22 +71,32 @@ export default {
         'content': this.editor.txt.html(),
         'puberaccount': localStorage.getItem('account'),
         'token': localStorage.getItem('token'),
-        'id': parseInt(this.$route.query.blog_id)
+        'id': parseInt(this.$route.query.blog_id),
+        'categoryname': this.valueforcategory
       }
+      console.log(this.valueforcategory)
       var config = {
         method: 'post',
         // url: 'http://175.24.28.202:8000/api/v1/subs_service',
         url: 'http://localhost:8090/blog/updateblog',
         headers: {
-          'Content-Type': 'application/json;charset=UTF-8'
+          'Content-Type': 'application/json;charset=UTF-8',
           // 'Host': 'http://175.24.28.202:80'
+          'puberaccount': localStorage.getItem('account'),
+          'token': localStorage.getItem('token')
         },
         data: datare
       }
-      console.log(datare)
+      var me = this
       axios(config)
         .then(function (response) {
           console.log(response)
+          if (response.data.code === 1) {
+            me.$message({
+              type: 'success',
+              message: '修改成功!'
+            })
+          }
         }).catch(function (error) {
           console.log(error)
         })

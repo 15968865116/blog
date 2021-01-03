@@ -35,7 +35,32 @@ async function sendaxios (methods, url, data) {
   return returndata
 }
 
+// 传递
+async function sendaxiosandtoken (account, token, methods, url, data) {
+  var axios = require('axios')
+  var returndata
+  var config = {
+    method: methods,
+    // url: 'http://175.24.28.202:8000/api/v1/subs_service',
+    url: url,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8',
+      'token': token,
+      'puberaccount': account
+      // 'Host': 'http://175.24.28.202:80'
+    },
+    data: data
+  }
+  await axios(config).then(function (response) {
+    returndata = response.data
+  }).catch(function (error) {
+    console.log(error)
+  })
+  return returndata
+}
+
 export {
   getbasicmessage,
-  sendaxios
+  sendaxios,
+  sendaxiosandtoken
 }
